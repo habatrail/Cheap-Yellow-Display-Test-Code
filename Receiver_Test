@@ -1,3 +1,16 @@
+#include <esp_now.h>
+#include <WiFi.h>
+#include <TFT_eSPI.h>
+
+TFT_eSPI tft = TFT_eSPI();
+
+typedef struct struct_message {
+    int count;
+} struct_message;
+
+struct_message myData;
+
+// Callback when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&myData, incomingData, sizeof(myData));
   
@@ -13,3 +26,29 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   Serial.print("Data Received: ");
   Serial.println(myData.count);
 }
+
+void setup() {
+  Serial.begin(115200);
+
+  // Initialize Screen
+  tft.init();
+  tft.setRotation(1); // Landscape
+  tft.fillScreen(TFT_BLACK);
+  
+  // Turn on Backlight
+  pinMode(21, OUTPUT);
+  digitalWrite(21, HIGH);
+
+  tft.setTextColor(TFT_WHITE);
+  tft.drawCentreString("Waiting for Sender...", 160, 50, 2);
+
+  WiFi.mode(WIFI_STA);
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("ESP-NOW Init Failed");
+    return;
+  }
+  
+  esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
+}
+
+void loop() {}
