@@ -1,0 +1,15 @@
+void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+  memcpy(&myData, incomingData, sizeof(myData));
+  
+  // Set text color WITH a background color (TFT_YELLOW on TFT_BLACK)
+  // This tells the library to "overwrite" the old pixels instead of 
+  // drawing transparently, which eliminates the need for fillScreen().
+  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+  
+  // Use a fixed width for the background to clear long numbers (padding)
+  // 160 is the center, 120 is the Y, 7 is the font
+  tft.drawCentreString("      " + String(myData.count) + "      ", 160, 120, 7); 
+  
+  Serial.print("Data Received: ");
+  Serial.println(myData.count);
+}
